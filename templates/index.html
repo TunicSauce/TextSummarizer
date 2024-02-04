@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Text Summarizer</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        padding: 20px;
+        text-align: center;
+    }
+
+    h1 {
+        color: #333;
+    }
+
+    #summarizer-form {
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        width: 60%;
+        max-width: 600px;
+    }
+
+    textarea {
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+        resize: vertical;
+    }
+
+    input[type="submit"] {
+        background-color: #5cb85c;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 17px;
+    }
+
+    input[type="submit"]:hover {
+        background-color: #4cae4c;
+    }
+
+    #summary {
+        margin-top: 30px;
+        text-align: left;
+        background-color: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        width: 60%;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Additional styles for new elements */
+    .form-control {
+        margin-bottom: 10px;
+        padding: 10px;
+        width: 95%;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+    label {
+        display: block;
+        margin-top: 10px;
+    }
+
+     #file-upload-form {
+        margin-top: 20px;
+    }
+    </style>
+</head>
+<body>
+    <h1>Text Summarizer</h1>
+    <form id="summarizer-form">
+        <textarea id="text-to-summarize" rows="4" cols="50"></textarea><br>
+
+        <!-- New summarization options -->
+        <label for="summary-length">Summary Length (50-300):</label>
+        <input type="range" id="summary-length" class="form-control" name="length" min="50" max="300" value="150">
+
+        <label for="summary-style">Summary Style:</label>
+        <select id="summary-style" class="form-control" name="style">
+            <option value="narrative">Narrative</option>
+            <option value="bullet_points">Bullet Points</option>
+            <option value="analytical">Analytical</option>
+        </select>
+
+        <input type="submit" value="Summarize">
+    </form>
+    <form id="file-upload-form" enctype="multipart/form-data">
+        <label for="file-upload">Upload Document (PDF, DOCX):</label>
+        <input type="file" id="file-upload" name="file" accept=".pdf, .docx"><br>
+        <input type="submit" value="Upload">
+    </form>
+    <h2>Summary:</h2>
+    <div id="summary"></div>
+
+<script>
+    $(document).ready(function() {
+        // Handler for text summarization form submission
+        $('#summarizer-form').on('submit', function(e) {
+            e.preventDefault();
+            var text = $('#text-to-summarize').val();
+            var length = $('#summary-length').val();
+            var style = $('#summary-style').val();
+
+            $.ajax({
+                url: '/summarize',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ text: text, length: length, style: style }),
+                success: function(data) {
+                    $('#summary').text(data.summary);
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });
+        });
+
+        // Handler for file upload form submission
+        $('#file-upload-form').on('submit', function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+            $.ajax({
+                url: '/upload',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(data) {
+                    $('#summary').text(data.summary);
+                },
+                error: function(error) {
+                    console.log(error);
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
